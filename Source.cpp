@@ -58,3 +58,38 @@ void oops()
     std::thread my_thread(my_func);
     my_thread.detach(); // Don't wait for thread to finish 
 } // some_local_state has been destructed but my_thread still uses it
+
+
+
+
+
+/**********************************************/
+/* 2.1.3 Waiting in exceptional circumstances */
+/**********************************************/
+
+// Using join in catch block is verbose. It's better to use RAII concept
+// Resource Aqcuisition Is Initialization
+class thread_guard
+{
+    std::thread& t;
+public:
+    explicit thread_guard(std::thread& t_) : t(t_) {}
+    ~thread_guard()
+    {
+        if (t.joinable())
+        {
+            t.join();
+        }
+    }
+    thread_guard(const thread_guard&) = delete;
+    thread_guard& operator=(const thread_guard&) = delete;
+};
+struct func; // Defined above
+void f()
+{
+    int some_local_state = 0;
+    func my_func(some_local_state);
+    std::thread t(my_func);
+    thread_guard g(t);
+    do_something_in_current_thread(); // When f reaches the end or throws an exception, its objects are being destroyed.
+}
