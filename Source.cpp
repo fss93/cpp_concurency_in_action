@@ -14,11 +14,11 @@ std::thread my_thread(do_some_work);
 class background_task
 {
 public:
-	void operator() () const
-	{
-		do_something();
-		do_something_else();
-	}
+    void operator() () const
+    {
+        do_something();
+        do_something_else();
+    }
 };
 background_task f;
 std::thread my_thread(f);
@@ -34,27 +34,27 @@ std::thread my_thread{ background_task() }; // Correct
 
 // Lambda expressions are useful for thread declarations
 std::thread my_thread([] {
-	do_something();
-	do_something_else();
+    do_something();
+    do_something_else();
 });
 
 // Beware of dangling references
 struct func
 {
-	int& i;
-	func(int& i_) : i(i_){}
-	void operator() ()
-	{
-		for (unsigned j = 0; j < 1000000; j++)
-		{
-			do_something(i); // Potential access to dangling reference
-		}
-	}
+    int& i;
+    func(int& i_) : i(i_){}
+    void operator() ()
+    {
+        for (unsigned j = 0; j < 1000000; j++)
+        {
+            do_something(i); // Potential access to dangling reference
+        }
+    }
 };
 void oops()
 {
-	int some_local_state = 0;
-	func my_func(some_local_state);
-	std::thread my_thread(my_func);
-	my_thread.detach(); // Don't wait for thread to finish 
+    int some_local_state = 0;
+    func my_func(some_local_state);
+    std::thread my_thread(my_func);
+    my_thread.detach(); // Don't wait for thread to finish 
 } // some_local_state has been destructed but my_thread still uses it
